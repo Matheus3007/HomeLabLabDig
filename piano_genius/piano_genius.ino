@@ -260,7 +260,7 @@ void loop() {
                 return;
             }
 
-            if (led_change) {
+            if (led_change && itera >-2) {
                 if (btn_recieved == -1) {
                     Serial.println("recebeu led");
                     btn_recieved = 0;
@@ -294,6 +294,7 @@ void loop() {
                 } else if (timeout) {
                     itera++;
                     Serial.println("timeout");
+                    timeout = false;
                 }
             }
         }
