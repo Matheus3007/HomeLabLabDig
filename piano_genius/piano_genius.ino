@@ -76,6 +76,7 @@ const uint8_t btn_pins[] = {D1, D2, D5, D6};
 
 bool led_change = false;
 int btn_recieved = 0;
+bool timeout = false;
 
 int song = 0;
 int itera = -1;
@@ -123,6 +124,11 @@ void callback(char* topic, byte* payload, unsigned int length) {
         if (strcmp(topic, (user + leds_topics[i]).c_str()) == 0) {
             if ((char)payload[0] == '1') {
                 digitalWrite(leds_pins[i], HIGH);
+
+                if (led_change) {
+                    timeout = true;
+                }
+
                 led_change = true;
             } else {
                 digitalWrite(leds_pins[i], LOW);
@@ -261,6 +267,7 @@ void loop() {
                 } else if (btn_recieved > 0) {
                     itera++;
                     Serial.println("proxima nota");
+
                     switch(song){
                     case 1:
                         tone(D7, doremifa[itera], doremifa_d[itera]);
@@ -284,6 +291,9 @@ void loop() {
                     }
 
                     led_change = false;
+                } else if (timeout) {
+                    itera++;
+                    Serial.println("timeout");
                 }
             }
         }
