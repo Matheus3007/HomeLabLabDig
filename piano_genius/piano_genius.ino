@@ -74,7 +74,7 @@ const uint8_t leds_pins[] = {D3, D4, D8, D0};
 const String btn_topics[] = {"/E0", "/E1", "/E2", "/E3"};
 const uint8_t btn_pins[] = {D1, D2, D5, D6};
 
-bool led_change = false;
+int led_recieved = 0;
 int btn_recieved = 0;
 bool timeout = false;
 
@@ -125,11 +125,11 @@ void callback(char* topic, byte* payload, unsigned int length) {
             if ((char)payload[0] == '1') {
                 digitalWrite(leds_pins[i], HIGH);
 
-                if (led_change) {
+                if (led_recieved > 0) {
                     timeout = true;
                 }
 
-                led_change = true;
+                led_recieved = i + 1;
             } else {
                 digitalWrite(leds_pins[i], LOW);
             }
@@ -260,7 +260,7 @@ void loop() {
                 return;
             }
 
-            if (led_change && itera >-2) {
+            if (led_recieved > 0 && itera != -2) {
                 if (btn_recieved == -1) {
                     Serial.println("recebeu led");
                     btn_recieved = 0;
@@ -268,19 +268,23 @@ void loop() {
                     itera++;
                     Serial.println("proxima nota");
 
-                    switch(song){
-                    case 1:
-                        tone(D7, doremifa[itera], doremifa_d[itera]);
-                        break;
-                    case 2:
-                        tone(D7, tetris[itera], tetris_d[itera]);
-                        break;
-                    case 3:
-                        tone(D7, fallen[itera], fallen_d[itera]);
-                        break;
-                    case 4:
-                        tone(D7, mario[itera], mario_d[itera]);
-                        break;
+                    if (led_recieved != btn_recieved) {
+                        tone(D7, NOTE_B0, 250)
+                    } else {
+                        switch(song){
+                        case 1:
+                            tone(D7, doremifa[itera], doremifa_d[itera]);
+                            break;
+                        case 2:
+                            tone(D7, tetris[itera], tetris_d[itera]);
+                            break;
+                        case 3:
+                            tone(D7, fallen[itera], fallen_d[itera]);
+                            break;
+                        case 4:
+                            tone(D7, mario[itera], mario_d[itera]);
+                            break;
+                        }
                     }
 
                     btn_recieved = -1;
@@ -290,11 +294,11 @@ void loop() {
                         btn_recieved = 0;
                     }
 
-                    led_change = false;
+                    led_recieved = 0;
                 } else if (timeout) {
                     itera++;
-                    Serial.println("timeout");
                     timeout = false;
+                    Serial.println("timeout");
                 }
             }
         }
