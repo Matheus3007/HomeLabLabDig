@@ -68,11 +68,11 @@ int mario_d[] = {250, 250, 250, 250, 250,
                  250, 250, 250, 250, 250,
                  250, 250, 250, 250, 250};
 
-const String leds_topics[] = {"/S0", "/S1", "/S2", "/S3"}
-const int leds_pin[] = {D1, D2, D5, D6};
+const String leds_topics[] = {"/S0", "/S1", "/S2", "/S3"};
+const int leds_pins[] = {D3, D4, D8, D0};
 
-const String btn_topics[] = {"/E0", "/E1", "/E2", "/E3"}
-const int btn_pin[] = {D3, D4, D8, D0};
+const String btn_topics[] = {"/E0", "/E1", "/E2", "/E3"};
+const int btn_pins[] = {D1, D2, D5, D6};
 
 bool led_change = false;
 bool btn_recieved = false;
@@ -109,7 +109,7 @@ void setup_wifi() {
     Serial.println(WiFi.localIP());
 }
 
-void callback_leds(char* topic, byte* payload, unsigned int length) {
+void callback(char* topic, byte* payload, unsigned int length) {
     Serial.print("Message arrived [");
     Serial.print(topic);
     Serial.print("] ");
@@ -120,7 +120,7 @@ void callback_leds(char* topic, byte* payload, unsigned int length) {
     Serial.println();
 
     for (int i = 0; i < 4; i++) {
-        if (strcmp(topic, (user + leds[i]).c_str()) == 0) {
+        if (strcmp(topic, (user + leds_topics[i]).c_str()) == 0) {
             if ((char)payload[0] == '1') {
                 digitalWrite(leds_pins[i], HIGH);
                 led_change = true;
@@ -131,7 +131,7 @@ void callback_leds(char* topic, byte* payload, unsigned int length) {
     }
 
     for (int i = 0; i < 4; i++) {
-        if (strcmp(topic, (user + buttons[i]).c_str()) == 0) {
+        if (strcmp(topic, (user + btn_topics[i]).c_str()) == 0) {
             if ((char)payload[0] == '1' && btn_recieved == 0) {
                 btn_recieved = i + 1;
             }
@@ -219,21 +219,24 @@ void loop() {
 
         if(ms_cnt%100==0){
             for (int i = 0; i < 4; i++) {
-                btn_values[i] = digitalRead(btn_pin[i]);
+                btn_values[i] = digitalRead(btn_pins[i]);
 
                 if (btn_values[i] != prev_btn_values[i]) {
                     prev_btn_values[i] = btn_values[i];
 
                     if (btn_values[i] == HIGH) {
-                        client.publish((user + buttons[i]).c_str(), "1");
+                        Serial.println("recebeu botão");
+                        Serial.println(i);
+                        client.publish((user + btn_topics[i]).c_str(), "1");
                     } else {
-                        client.publish((user + buttons[i]).c_str(), "0");
+                        client.publish((user + btn_topics[i]).c_str(), "0");
                     }
                 }
             }
 
             if (itera == -2) {
                 if (btn_recieved > 0) {
+                    Serial.println("recomecou partida");
                     itera++;
                     btn_recieved = 0;
                 }
@@ -241,12 +244,14 @@ void loop() {
 
             if (itera == -1) {
                 if (btn_recieved > 0) {
+                    Serial.println("escolheu musica");
+                    Serial.println(btn_recieved);
                     song = btn_recieved;
                     itera++;
                     btn_recieved = -1;
                 }
 
-                continue;
+                return;
             }
 
             if (led_change) {

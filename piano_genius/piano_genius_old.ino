@@ -1,4 +1,4 @@
-#include <ESP8266WiFi.h>
+/*#include <ESP8266WiFi.h>
 #include <PubSubClient.h>
 #include "pitches.h"
 
@@ -418,3 +418,4 @@ void loop() {
     client.publish((user+"/E6").c_str(), zero_cstr); // botão virtual
   }
 }
+*/
