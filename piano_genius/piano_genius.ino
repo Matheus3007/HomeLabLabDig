@@ -3,8 +3,6 @@
 
 #include "pitches.h"
 
-#define MSG_BUFFER_SIZE  (50)
-
 String user = "grupo1-bancadaB1";
 String passwd = "L@Bdygy1B1";
 
@@ -14,9 +12,6 @@ const char* mqtt_server = "labdigi.wiseful.com.br";
 
 WiFiClient espClient;
 PubSubClient client(espClient);
-
-unsigned long lastMsg = 0;
-char msg[MSG_BUFFER_SIZE];
 
 int melody[] = {NOTE_C4, NOTE_G3, NOTE_G3, NOTE_A3, NOTE_G3, 0, NOTE_B3, NOTE_C4};
 
@@ -75,29 +70,21 @@ int mario_d[] = {250, 250, 250, 250, 250,
 
 const String leds_topics[] = {"/S0", "/S1", "/S2", "/S3"}
 const int leds_pin[] = {D1, D2, D5, D6};
+
 const String btn_topics[] = {"/E0", "/E1", "/E2", "/E3"}
 const int btn_pin[] = {D3, D4, D8, D0};
 
 bool led_change = false;
-bool btn_change = false;
+bool btn_recieved = false;
 
 int song = 0;
 int itera = -1;
 
-int value = 0; //sinal de heartbeat
-
 bool btn_values[4] = {false};
 bool prev_btn_values[4] = {false};
 
-bool led = 0; //estado do led
-
 uint32_t prev_millis;
 uint32_t ms_cnt = 0;
-
-const char* zero_cstr = "0";
-const char* one_cstr = "1";
-
-int valor;
 
 void setup_wifi() {
     delay(10);
@@ -232,12 +219,12 @@ void loop() {
 
         if(ms_cnt%100==0){
             for (int i = 0; i < 4; i++) {
-                btn_value[i] = digitalRead(btn_pin[i]);
+                btn_values[i] = digitalRead(btn_pin[i]);
 
-                if (btn_value[i] != prev_btn_values[i]) {
-                    prev_btn_values[i] = btn_value[i];
+                if (btn_values[i] != prev_btn_values[i]) {
+                    prev_btn_values[i] = btn_values[i];
 
-                    if (btn_value[i] == HIGH) {
+                    if (btn_values[i] == HIGH) {
                         client.publish((user + buttons[i]).c_str(), "1");
                     } else {
                         client.publish((user + buttons[i]).c_str(), "0");
