@@ -69,13 +69,13 @@ int mario_d[] = {250, 250, 250, 250, 250,
                  250, 250, 250, 250, 250};
 
 const String leds_topics[] = {"/S0", "/S1", "/S2", "/S3"};
-const int leds_pins[] = {D3, D4, D8, D0};
+const uint8_t leds_pins[] = {D3, D4, D8, D0};
 
 const String btn_topics[] = {"/E0", "/E1", "/E2", "/E3"};
-const int btn_pins[] = {D1, D2, D5, D6};
+const uint8_t btn_pins[] = {D1, D2, D5, D6};
 
 bool led_change = false;
-bool btn_recieved = false;
+int btn_recieved = 0;
 
 int song = 0;
 int itera = -1;
@@ -256,9 +256,11 @@ void loop() {
 
             if (led_change) {
                 if (btn_recieved == -1) {
-                    itera++;
+                    Serial.println("recebeu led");
                     btn_recieved = 0;
                 } else if (btn_recieved > 0) {
+                    itera++;
+                    Serial.println("proxima nota");
                     switch(song){
                     case 1:
                         tone(D7, doremifa[itera], doremifa_d[itera]);
@@ -273,6 +275,8 @@ void loop() {
                         tone(D7, mario[itera], mario_d[itera]);
                         break;
                     }
+
+                    btn_recieved = -1;
 
                     if (itera == 30) {
                         itera = -2;
