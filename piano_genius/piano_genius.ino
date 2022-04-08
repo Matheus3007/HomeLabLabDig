@@ -132,6 +132,11 @@ void callback(char* topic, byte* payload, unsigned int length) {
                 led_recieved = i + 1;
             } else {
                 digitalWrite(leds_pins[i], LOW);
+
+                if (itera == 30) {
+                    itera = -2;
+                    btn_recieved = 0;
+                }
             }
         }
     }
@@ -260,12 +265,11 @@ void loop() {
                 return;
             }
 
-            if (led_recieved > 0 && itera != -2) {
+            if (led_recieved > 0 && itera >= 0) {
                 if (btn_recieved == -1) {
                     Serial.println("recebeu led");
                     btn_recieved = 0;
                 } else if (btn_recieved > 0) {
-                    itera++;
                     Serial.println("proxima nota");
 
                     if (led_recieved != btn_recieved) {
@@ -287,13 +291,8 @@ void loop() {
                         }
                     }
 
+                    itera++;
                     btn_recieved = -1;
-
-                    if (itera == 30) {
-                        itera = -2;
-                        btn_recieved = 0;
-                    }
-
                     led_recieved = 0;
                 } else if (timeout) {
                     itera++;
