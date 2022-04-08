@@ -273,7 +273,7 @@ void loop() {
                     Serial.println("proxima nota");
 
                     if (led_recieved != btn_recieved) {
-                        tone(D7, NOTE_B0, 250)
+                        tone(D7, NOTE_C2, 250);
                     } else {
                         switch(song){
                         case 1:
